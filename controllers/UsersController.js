@@ -1,35 +1,38 @@
-const dbClient = require('../utils/db');
-const redisClient = require('../utils/redis');
+import sha1 from 'sha1';
+import DBClient from '../utils/db';
+import RedisClient from '../utils/redis';
+
+const { ObjectId } = require('mongodb');
 
 class UsersController {
-  static async getMe(req, res) {
-    const token = req.header('X-Token');
+  static async postNew (request, response) {
+    const userEmail = request.body.email;
+    if (!userEmail) return response.status(400).send({ error: 'Missing email' });
 
-    if (!token) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+    const userPassword = request.body.password;
+    if (!userPassword) return response.status(400).send({ error: 'Missing password' });
 
-    try {
-      const userId = await redisClient.get(`auth_${token}`);
+    const oldUserEmail = await DBClient.db.collection('users').findOne({ email: userEmail });
+    if (oldUserEmail) return response.status(400).send({ error: 'Already exist' });
 
-      if (!userId) {
-        return res.status(401).json({ error: 'Unauthorized' });
-      }
+    const shaUserPassword = sha1(userPassword);
+    const result = await DBClient.db.collection('users').insertOne({ email: userEmail, password: shaUserPassword });
 
-      const user = await dbClient
-        .db()
-        .collection('users')
-        .findOne({ _id: userId });
+    return response.status(201).send({ id: result.insertedId, email: userEmail });
+  }
 
-      if (!user) {
-        return res.status(401).json({ error: 'Unauthorized' });
-      }
+  static async getMe (request, response) {
+    const token = request.header('X-Token') || null;
+    if (!token) return response.status(401).send({ error: 'Unauthorized' });
 
-      return res.status(200).json({ email: user.email, id: user._id });
-    } catch (error) {
-      console.error('Error retrieving user:', error);
-      return res.status(500).json({ error: 'Internal Server Error' });
-    }
+    const redisToken = await RedisClient.get(`auth_${token}`);
+    if (!redisToken) return response.status(401).send({ error: 'Unauthorized' });
+
+    const user = await DBClient.db.collection('users').findOne({ _id: ObjectId(redisToken) });
+    if (!user) return response.status(401).send({ error: 'Unauthorized' });
+    delete user.password;
+
+    return response.status(200).send({ id: user._id, email: user.email });
   }
 }
 
