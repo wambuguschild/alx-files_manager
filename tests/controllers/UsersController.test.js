@@ -11,7 +11,7 @@ const { expect } = chai;
 
 chai.use(chaiHttp);
 
-describe('UsersController', () => {
+describe('usersController', () => {
   describe('postNew', () => {
     it('should create a new user and return user information', async () => {
       const request = {

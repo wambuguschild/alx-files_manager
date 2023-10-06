@@ -11,7 +11,7 @@ const { expect } = chai;
 
 chai.use(chaiHttp);
 
-describe('AuthController', () => {
+describe('authController', () => {
   describe('getConnect', () => {
     it('should return a token if valid credentials are provided', async () => {
       const request = {

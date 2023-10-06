@@ -1,11 +1,11 @@
 const chai = require('chai');
 const sinon = require('sinon');
-const DBClient = require('./dbClient');
 const { MongoClient } = require('mongodb');
+const DBClient = require('./dbClient');
 
 const { expect } = chai;
 
-describe('DBClient', () => {
+describe('dBClient', () => {
   let mockClient;
 
   before(() => {

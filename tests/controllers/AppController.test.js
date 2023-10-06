@@ -9,7 +9,7 @@ const { expect } = chai;
 
 chai.use(chaiHttp);
 
-describe('AppController', () => {
+describe('appController', () => {
   describe('getStatus', () => {
     it('should return status with redis and db information', async () => {
       // Mock the RedisClient and DBClient methods

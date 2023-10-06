@@ -5,7 +5,7 @@ const RedisClient = require('./redisClient');
 
 const { expect } = chai;
 
-describe('RedisClient', () => {
+describe('redisClient', () => {
   let mockClient;
 
   beforeEach(() => {
